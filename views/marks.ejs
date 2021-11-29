@@ -1,0 +1,38 @@
+<form id="tableForm" action="/filterData" method="get">
+    <select class="filterdata" data-style="btn-info">
+        <optgroup label="Select Table">
+            <!-- <option name="" value="0">Select table</option> -->
+            <option name="table1" value="studentid">Student ID</option>
+            <option name="table2" value="year">Year</option>
+            <option name="table3" value="">Table 3</option>
+        </optgroup>
+    </select>
+    <input type="text" name="" placeholder="enter filter value here !">
+    <input type="submit" value="Get Student Data" />
+</form>
+
+<% if(data!=null) { %>
+<table border="1">
+<tr>
+    <th>id</th>
+    <th>Student Details</th>
+    <th>Subject </th>
+    <th>Semester </th>
+    <th>Marks</th>
+    <th>Year </th>
+    <th>Grade </th>
+</tr>
+<% data.forEach(function(studMarks){ %>
+<tr>
+    <!-- <span><%= studMarks%></span> -->
+    <td><%= studMarks._id%></td>
+    <td>Name : <%= studMarks.student_ref_id[0]._name%> (id:<%= studMarks.student_ref_id[0].student_id%>)</td>
+    <td><%= studMarks.subject_ref_id[0]._subject%></td>
+    <td><%= studMarks.semester%></td>
+    <td><%= studMarks.marks%></td>
+    <td><%= studMarks.year%></td>
+    <td><%= studMarks.grade%></td>
+</tr>
+<% }) %>
+</table>
+<% } %>

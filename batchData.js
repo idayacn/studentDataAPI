@@ -1,15 +1,21 @@
 const MongoClient = require('mongodb').MongoClient;
-
 require('dotenv/config');
 const connString = process.env.DB_HOST;
+
 const databaseName = process.env.DB_NAME;
 const collectionName = process.env.TB_NAME; 
+const { Student,Subject, Address ,Mark } = require('./models/schema')
+let studentMarks = [];
+var ObjectId = require('mongodb').ObjectID;
 
 process.on("message", (msg) => {
-    const {startCount, endCount} = msg;
-    // console.log(startCount +" - "+ endCount);
-    inputStudents(startCount, endCount);
+    const {startCount, endCount,studentdata,subjectInfo} = msg;    
+    generateData(startCount,endCount,studentdata,subjectInfo);
 });
+
+function randomNumber(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
 
 function init() {
     return new Promise(function(r, e) {
@@ -20,44 +26,48 @@ function init() {
     });
 }
 
-function randomNumber(min, max) {
-    return Math.floor(Math.random() * (max - min + 1) + min);
+function generateData(startCount,endCount,studentdata,subjectInfo){
+
+
+    var semester = ['1st Semester', '2nd Semester'];
+
+    for(let i = startCount; i <= endCount; i++ ){
+ 
+        var stdNo = randomNumber(0,19);
+        var sbjNo = randomNumber(0,4);
+        var student_id = studentdata[stdNo]._id;
+        var subject_id = subjectInfo[sbjNo]._id;
+        
+        marksInfo = {
+            // '_id':ObjectId(),
+            'student_ref_id':ObjectId(student_id),
+            'subject_ref_id':ObjectId(subject_id),
+            'marks':randomNumber(100,999)/10,
+            'semester':semester[Math.floor(Math.random()*semester.length)],
+            'year':randomNumber(2011,2020), 
+            'grade':randomNumber(1,12)
+        };  
+ 
+        studentMarks.push({ insertOne : { "document" : marksInfo } });               
+    } 
+    saveData(studentMarks);
 }
 
-function inputStudents(startCount, endCount) { 
-	
-	let studentData = [];
+function saveData(studentMarks){
 
-    for(let i = startCount; i <= endCount; i++ ){ 
-
-        var semester = ['1st Semester', '2nd Semester'];
-        var subjects = ['Biology','Chemistry','Biotechnology','Maths','Physics'];       
-        let marks = [];
-        let subjectInfo = [];
-        let subjectSecondsem = [];
-        // var sid = studentid[Math.floor(Math.random()*studentid.length)];
-
-        for(k = 0; k < 5; k++){
-        	subjectInfo.push({'name':subjects[k] ,'Marks':randomNumber(100,1000)/10});
-        }
-
-        for (j = 0; j < 2; j++) {
-            marks.push({'Semester':semester[j],'Subjects':subjectInfo});
-        }
-
-        studentMarks = {'Student id':randomNumber(1,20), 'Marks Info':marks, 'Class':randomNumber(1,12), 'Year':randomNumber(2011,2020)};
-
-        studentData.push({ insertOne : { "document" : studentMarks } });
-    }
     init()
-        .then((db) => {
-            const studentDb = db.db(databaseName);
-            const student =  studentDb.collection(collectionName)  
-            
-            student.bulkWrite(studentData, function(err, res) {
-                if (err) throw err;                
-                db.close();
-            });     
-        })
-        .catch((err) => { console.log("error :", err) });         
+    .then((db) => {
+
+        const studentDb = db.db(databaseName);
+        const marks =  studentDb.collection(collectionName);
+        
+        marks.bulkWrite(studentMarks, function(err, res) {
+            if (err) throw err;    
+            console.log("Marks Updated!");            
+            db.close();
+        });     
+    })
+    .catch((err) => { console.log("error :", err) }); 
+
 }
+

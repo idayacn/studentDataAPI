@@ -1,0 +1,84 @@
+<!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script> -->
+
+<!-- optionally if you need translation for your language then include locale file as mentioned below -->
+<!-- <script src="path/to/js/locales/<lang>.js"></script> -->
+<h1>Dependent Dropdown</h1>
+
+<form name="myform" id="myForm">
+    <select name="optone" id="continentSel" size="1">
+        <option value="" selected="selected">Select continent</option>
+    </select>
+    <br>
+    <br>
+    <select name="opttwo" id="countrySel" size="1">
+        <option value="" selected="selected">Please select continent first</option>
+    </select>
+    <br>
+    <br>
+    <select name="optthree" id="citySel" size="1">
+        <option value="" selected="selected">Please select state first </option>
+    </select>
+</form>
+<hr/>
+
+<!-- <% if(data!=null) { %>
+<% data.forEach(function(student){ %>
+<%= student.student_ref_id[0]%>
+
+<% }) %>
+
+<% } %> -->
+
+<script type="text/javascript">
+studentIDs = [];
+<% if(data!=null) { %>
+studentID =[];
+<% data.forEach(function(student){ %>
+datata = <%= student.student_ref_id[0].student_id%>
+// console.log(datata);
+studentID.push(datata);
+<% }) %>
+ studentIDs = studentID.filter((element, index) => {
+    return studentID.indexOf(element) === index;
+});
+// console.log(studentIDs);
+<% } %>
+// console.log(studentIDs);
+var stateObject ={
+  "Europe": {
+          "France": ["Paris", "Lyon"],
+          "UK": ["London", "Birmingham"],
+          "UddK": ["London", "Birmingham"]
+      },
+      "Africa": {
+          "Senegal": ["Dakar", "Louga"],
+          "South Africa": ["Cape Town", "Pretoria"]
+      }
+}
+
+window.onload = function () {
+    var continentSel = document.getElementById("continentSel"),
+        countrySel = document.getElementById("countrySel"),
+        citySel = document.getElementById("citySel");
+    for (var item in stateObject) {
+        continentSel.options[continentSel.options.length] = new Option(item, item);
+    }
+    continentSel.onchange = function () {
+        countrySel.length = 1; // remove all options bar first
+        citySel.length = 1; // remove all options bar first
+        if (this.selectedIndex < 1) return; // done
+        for (var item in stateObject[this.value]) {
+            countrySel.options[countrySel.options.length] = new Option(item, item);
+        }
+    }
+    continentSel.onchange(); // reset in case page is reloaded
+    countrySel.onchange = function () {
+        citySel.length = 1; // remove all options bar first
+        if (this.selectedIndex < 1) return; // done
+        var cities = stateObject[continentSel.value][this.value];
+        for (var i = 0; i < cities.length; i++) {
+            citySel.options[citySel.options.length] = new Option(cities[i], cities[i]);
+        }
+    }
+}
+</script>

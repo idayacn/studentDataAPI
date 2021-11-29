@@ -1,15 +1,47 @@
 const {fork} = require("child_process");
+const mongoose = require('mongoose');
+const { Student,Subject, Address ,Mark } = require('./models/schema')
+require('dotenv/config');
+const connString = process.env.DB_HOST;
+
 let counter = 1;
+let marksData = [];
+let ObjectId = require('mongodb').ObjectID;
+
+mongoose.connect(connString,()=>
+    console.log('connected to DB!')
+);
 
 function createProcess(data){
-    const worker =  fork("./batchData");    
-    worker.send(data);   
+
+    const singleRecord =  fork("./batchData");   
+    singleRecord.send(data);
+    counter++;  
 }
 
-function bulkData(records) {
+async function getStudents() {
 
-    const batchCount = 100;
+    var students = await Student.find({}, { projection: { _id: 1} });
+    var subjects = await Subject.find({}, { projection: { _id: 1} });
+
+    marksData = {
+        'students':students,
+        'subjects':subjects
+    };
+    return marksData;
+}
+
+
+getStudents().then(marksData => {
+
+    var studentdata = marksData['students'];
+    var subjectInfo = marksData['subjects'];
+    
+    // console.log(studentdata);
+    var records = 100;
+    const batchCount = 10;
     const batchData = Math.ceil(records/batchCount);
+
     let data = {};
 
     for(let i = 1; i <= batchData; i++) { 
@@ -18,11 +50,11 @@ function bulkData(records) {
 
             data.startCount = (batchCount * i) + 1;
             data.endCount = batchCount * (i+1) ;
+            data.studentdata = studentdata;
+            data.subjectInfo = subjectInfo;
   
             createProcess(data);
-        }   
-        counter++;  
+        }           
     }
-} 
+});
 
-bulkData(1000);
