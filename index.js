@@ -38,8 +38,8 @@ getStudents().then(marksData => {
     var subjectInfo = marksData['subjects'];
     
     // console.log(studentdata);
-    var records = 100;
-    const batchCount = 10;
+    var records = 1000000;
+    const batchCount = 10000;
     const batchData = Math.ceil(records/batchCount);
 
     let data = {};
